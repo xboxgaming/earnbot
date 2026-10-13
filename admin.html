@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#0d0a06;--card:#1a140c;--line:#3a2c14;--gold:#ffb524;--text:#f6ecd8;--muted:#a89572;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;padding:16px}
+.wrap{max-width:760px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+input{width:100%;padding:11px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:#120d06;color:var(--text);font-size:15px}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--gold);color:#2b1a00;cursor:pointer;font-size:14px}
+button.g{background:transparent;border:1px solid var(--line);color:var(--text)}
+button.ok{background:var(--ok)}button.bad{background:var(--bad)}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button.on{background:var(--gold)}.tabs button:not(.on){background:transparent;border:1px solid var(--line);color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stats b{display:block;font-size:22px;color:var(--gold)}
+.muted{color:var(--muted);font-size:13px}
+.r{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+code{background:#120d06;padding:2px 6px;border-radius:6px;word-break:break-all}
+a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Admin panel</h2>
+  <div id="login" class="card">
+    <input id="em" type="email" placeholder="Admin email">
+    <input id="pw" type="password" placeholder="Password">
+    <button onclick="login()">Login</button> <span id="err" class="muted"></span>
+  </div>
+  <div id="main" style="display:none">
+    <div class="stats" id="stats"></div>
+    <div class="tabs">
+      <button id="t-pending" class="on" onclick="tab('pending')">Pending</button>
+      <button id="t-done" onclick="tab('done')">History</button>
+      <button id="t-users" onclick="tab('users')">Users</button>
+      <button class="g" onclick="firebase.auth().signOut()">Logout</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+// Wahi Firebase config jo index.html me hai
+const firebaseConfig = {
+  apiKey: "AIzaSyAVYZQ46H68YzzHiR--SFQTopUfVhiJb6U", authDomain: "dailymearn.firebaseapp.com", projectId: "dailymearn",
+  storageBucket: "dailymearn.firebasestorage.app", messagingSenderId: "860915920667", appId: "1:860915920667:web:8162ddfd689399482fadbe"
+};
+const ADMIN_EMAIL = "vineetundirwade@gmail.com"; // rules me bhi yahi email daalna
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let W = [], USERS = [], cur = 'pending';
+
+async function login() {
+  $('err').textContent = '';
+  try { await auth.signInWithEmailAndPassword($('em').value.trim(), $('pw').value); }
+  catch (e) { $('err').textContent = 'Login fail: ' + e.message; }
+}
+auth.onAuthStateChanged(u => {
+  const ok = u && u.email === ADMIN_EMAIL;
+  $('login').style.display = ok ? 'none' : 'block';
+  $('main').style.display = ok ? 'block' : 'none';
+  if (u && !ok && !u.isAnonymous) { $('err').textContent = 'Ye admin account nahi hai'; auth.signOut(); }
+  if (ok) load();
+});
+
+async function load() {
+  const [w, u] = await Promise.all([
+    db.collection('withdrawals').get(),
+    db.collection('users').orderBy('points', 'desc').limit(300).get()
+  ]);
+  W = w.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  USERS = u.docs.map(d => ({ id: d.id, ...d.data() }));
+  stats(); tab(cur);
+}
+function stats() {
+  const pend = W.filter(x => x.status === 'pending'), paid = W.filter(x => x.status === 'paid');
+  const sum = (a, c) => a.filter(x => x.currency === c).reduce((s, x) => s + Number(x.amount), 0);
+  $('stats').innerHTML = `
+    <div><span class="muted">Users</span><b>${USERS.length}</b></div>
+    <div><span class="muted">Pending requests</span><b>${pend.length}</b></div>
+    <div><span class="muted">Pending payout</span><b>₹${sum(pend, 'INR')} + ${sum(pend, 'USDT').toFixed(2)} USDT</b></div>
+    <div><span class="muted">Total paid</span><b>₹${sum(paid, 'INR')} + ${sum(paid, 'USDT').toFixed(2)} USDT</b></div>`;
+}
+function tab(t) {
+  cur = t;
+  ['pending', 'done', 'users'].forEach(x => $('t-' + x).classList.toggle('on', x === t));
+  if (t === 'users') return renderUsers($('list'), '');
+  const rows = W.filter(x => t === 'pending' ? x.status === 'pending' : x.status !== 'pending');
+  $('list').innerHTML = rows.length ? rows.map(card).join('') : '<p class="muted">Kuch nahi hai.</p>';
+}
+function card(x) {
+  const amt = x.currency === 'INR' ? '₹' + x.amount : x.amount + ' USDT';
+  const upi = x.method === 'UPI' ? `<a href="upi://pay?pa=${encodeURIComponent(x.address)}&pn=${encodeURIComponent(x.name || 'User')}&am=${x.amount}&cu=INR&tn=Payout" target="_blank">Open UPI app</a>` : '';
+  const when = x.createdAt ? new Date(x.createdAt.seconds * 1000).toLocaleString() : '';
+  const btns = x.status === 'pending'
+    ? `<button class="ok" onclick="setStatus('${x.id}','paid')">Mark paid</button><button class="bad" onclick="reject('${x.id}')">Reject + refund</button>` : `<b>${esc(x.status)}</b>`;
+  return `<div class="card"><b>${amt}</b> via ${esc(x.method)} <span class="muted">• ${esc(x.name)} (${esc(x.tid)}) • ${Number(x.points).toLocaleString()} pts • ${when}</span>
+    <div class="r"><code>${esc(x.address)}</code><button class="g" onclick="navigator.clipboard.writeText('${esc(x.address)}')">Copy</button> ${upi}</div>
+    <div class="r">${btns}</div></div>`;
+}
+async function setStatus(id, status) {
+  if (!confirm('Pakka ' + status + ' mark karna hai?')) return;
+  await db.collection('withdrawals').doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  load();
+}
+async function reject(id) {
+  const x = W.find(w => w.id === id);
+  if (!confirm('Reject karke ' + x.points + ' points wapas karne hain?')) return;
+  const b = db.batch();
+  b.update(db.collection('withdrawals').doc(id), { status: 'rejected', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  b.update(db.collection('users').doc(x.tid), { points: firebase.firestore.FieldValue.increment(Number(x.points)) });
+  await b.commit(); load();
+}
+function renderUsers(el, q) {
+  const rows = USERS.filter(u => !q || (u.id + ' ' + u.name).toLowerCase().includes(q.toLowerCase()));
+  el.innerHTML = `<input placeholder="Search name ya ID" value="${esc(q)}" oninput="renderUsers(document.getElementById('list'), this.value)" autofocus>` +
+    rows.slice(0, 100).map(u => `<div class="card"><b>${esc(u.name)}</b> <span class="muted">${esc(u.email)} • ID ${esc(u.id)} • refs ${u.referralCount || 0}</span>
+      <div class="r"><span>Points: <b>${Number(u.points).toLocaleString()}</b></span><span class="muted">Total earned: ${Number(u.totalEarned || 0).toLocaleString()}</span>
+      <button class="g" onclick="editPts('${esc(u.id)}')">Edit points</button></div></div>`).join('');
+  const i = el.querySelector('input'); i.focus(); i.setSelectionRange(q.length, q.length);
+}
+async function editPts(id) {
+  const u = USERS.find(x => x.id === id);
+  const v = prompt('Naye points (abhi ' + u.points + ')', u.points);
+  if (v === null || isNaN(Number(v)) || Number(v) < 0) return;
+  await db.collection('users').doc(id).update({ points: Number(v) });
+  load();
+}
+</script>
+</body>
+</html>
