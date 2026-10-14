@@ -244,7 +244,6 @@ async function adGiga() {
 }
 async function loadAdSdks() {
   if (CFG.DEV_MODE) return;
-  try { await loadScript(CFG.monetagSrc, { 'data-zone': CFG.monetagZone, 'data-sdk': 'show_' + CFG.monetagZone }); } catch (e) { console.warn(e); }
   try { await loadScript(CFG.gigaSrc + CFG.gigaId); } catch (e) { console.warn(e); }
 }
 
