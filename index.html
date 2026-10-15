@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<script src='//libtl.com/sdk.js' data-zone='12025292' data-sdk='show_12025292'></script>
+<script src="https://ad.gigapub.tech/script?id=8634"></script>
+<script src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Earn App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#0d0a06;--card:#1a140c;--line:#3a2c14;--gold:#ffb524;--gold2:#ff9a1f;--text:#f6ecd8;--muted:#a89572;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Outfit',system-ui,sans-serif}
+body{min-height:100vh;background:radial-gradient(120% 60% at 50% 0,#2a1c07 0,var(--bg) 60%)}
+.app{max-width:480px;margin:0 auto;padding:12px 16px 130px}
+header{display:flex;justify-content:space-between;align-items:center;padding:6px 2px 14px}
+.who{font-weight:700;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+.bal{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-weight:800;color:var(--gold)}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px}
+h2{margin:6px 0 12px;font-size:22px}
+h3{margin:0 0 4px;font-size:18px}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;align-items:center;gap:14px}
+.grow{flex:1;min-width:0}
+.btn{border:0;border-radius:14px;padding:13px 18px;font:700 16px 'Outfit',sans-serif;color:#2b1a00;background:linear-gradient(180deg,#ffd35a,var(--gold2));cursor:pointer}
+.btn.block{width:100%}.btn.sm{padding:10px 16px;font-size:15px}
+.btn:disabled{opacity:.45;filter:grayscale(.6)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.pill{display:inline-block;background:#2a1f0d;border:1px solid var(--line);color:var(--gold);border-radius:99px;padding:3px 10px;font-weight:700;font-size:14px}
+.bar{height:8px;background:#2a1f0d;border-radius:9px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),#ffd35a)}
+/* wheel */
+.wheelbox{position:relative;width:190px;height:190px;margin:4px auto 14px}
+#wheel{position:absolute;inset:0;border-radius:50%;border:4px solid var(--gold);background:conic-gradient(#6b4a1c 0 60deg,#c9a46a 60deg 120deg,#8a5a1f 120deg 180deg,#e0c08a 180deg 240deg,#5a3a14 240deg 300deg,#b88a48 300deg 360deg);transition:transform 4s cubic-bezier(.12,.7,.1,1)}
+#wheel span{position:absolute;left:50%;top:50%;font-weight:800;font-size:16px;color:#fff;text-shadow:0 1px 3px #000}
+.ptr{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border:10px solid transparent;border-top:18px solid #fff;z-index:2}
+/* checkin */
+.days{display:flex;justify-content:space-between;margin:14px 0}
+.day{width:38px;text-align:center;font-size:12px;color:var(--muted)}
+.day b{display:flex;width:36px;height:36px;border-radius:50%;border:2px solid var(--line);align-items:center;justify-content:center;font-size:15px;color:var(--text);margin-bottom:4px}
+.day.done b{background:var(--gold);color:#2b1a00;border-color:var(--gold)}
+.day.now b{border-color:var(--gold);color:var(--gold)}
+/* inputs */
+input,select{width:100%;background:#120d06;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px;font:16px 'Outfit',sans-serif;margin:6px 0 10px}
+label{font-size:13px;color:var(--muted)}
+.seg{display:flex;gap:8px;margin-bottom:10px}
+.seg button{flex:1}
+/* games */
+.ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:270px;margin:12px auto}
+.ttt button{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:#120d06;color:var(--gold);font:800 36px 'Outfit';cursor:pointer}
+.ttt button.o{color:#fff}
+canvas{display:block;margin:10px auto;background:#120d06;border:2px solid var(--line);border-radius:14px;touch-action:none}
+.pad{display:grid;grid-template-columns:repeat(3,56px);gap:6px;justify-content:center;margin-top:8px}
+.pad button{height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--gold);font-size:20px}
+/* list */
+.item{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border:0}
+.st-pending{color:var(--gold)}.st-paid{color:var(--ok)}.st-rejected{color:var(--bad)}
+/* nav */
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(448px,calc(100% - 24px));display:flex;justify-content:space-around;align-items:center;background:#16100a;border:1px solid var(--line);border-radius:28px;padding:8px 6px}
+nav button{background:none;border:0;color:var(--muted);font:600 12px 'Outfit';padding:8px 10px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .ic{font-size:20px}
+nav button.on{color:var(--text);background:#2a1f0d}
+nav .mid{margin-top:-34px;width:68px;height:68px;border-radius:50%;border:3px solid var(--gold);background:#120d06;color:var(--gold)}
+#toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-90px);background:#2a1f0d;border:1px solid var(--gold);color:var(--text);padding:10px 16px;border-radius:14px;font-weight:600;z-index:50;transition:transform .3s;max-width:90%;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+#adov{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:60;text-align:center;padding:24px}
+#adov.on{display:flex}
+#login{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:65;padding:20px;overflow:auto}
+.lbox{width:100%;max-width:400px}
+.err{color:var(--bad);font-size:14px;min-height:20px;margin-bottom:8px}
+.lnk{color:var(--gold);font-size:14px;cursor:pointer;text-align:center;margin-top:12px}
+#boot{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:70;text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<div id="boot">Loading...</div>
+<div id="login">
+  <div class="lbox card">
+    <h2 id="lTitle" style="margin-top:0">Create account</h2>
+    <p class="muted">Account banao taaki aapke points safe rahein.</p>
+    <div id="lNameBox"><label>Naam</label><input id="lName" placeholder="Aapka naam" autocomplete="name"></div>
+    <label>Email</label><input id="lEmail" type="email" placeholder="you@gmail.com" autocomplete="email">
+    <label>Password (kam se kam 6 akshar)</label><input id="lPw" type="password" autocomplete="current-password">
+    <div class="err" id="lErr"></div>
+    <button class="btn block" id="lBtn" onclick="submitLogin()">Sign up</button>
+    <div class="lnk" id="lSwitch" onclick="toggleLogin()">Pehle se account hai? Login karo</div>
+    <div class="lnk" id="lForgot" onclick="forgotPw()" style="display:none">Password bhool gaye?</div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="adov"><div style="font-size:42px">📺</div><h3 id="adname">Ad</h3><p class="muted">Test ad (DEV_MODE). Real ads live mode me aayenge.</p><h2 id="adcount">3</h2></div>
+
+<div class="app">
+  <header><div class="who" id="who"></div><div class="bal"><span id="bal">0</span> pts</div></header>
+
+  <!-- HOME -->
+  <section id="v-home" class="view on">
+    <div class="card">
+      <div class="muted">Daily bonus</div>
+      <h2 style="margin-top:2px">Lucky Spin</h2>
+      <div class="wheelbox"><div class="ptr"></div><div id="wheel"></div></div>
+      <div class="muted" style="text-align:center;margin-bottom:10px" id="spinInfo"></div>
+      <button class="btn block" id="spinBtn" onclick="doSpin()">Spin</button>
+    </div>
+    <div class="card">
+      <div class="row"><div class="grow"><h3>Daily check-in</h3><div class="muted" id="ciInfo"></div></div></div>
+      <div class="days" id="days"></div>
+      <button class="btn block" id="ciBtn" onclick="claimCheckin()">Claim</button>
+    </div>
+  </section>
+
+  <!-- TASKS -->
+  <section id="v-tasks" class="view">
+    <h2>Watch &amp; Earn</h2>
+    <div id="adCards"></div>
+  </section>
+
+  <!-- GAMES -->
+  <section id="v-games" class="view">
+    <h2>Games</h2>
+    <div id="gameMenu">
+      <div class="card"><div class="row"><div class="grow"><h3>Tic Tac Toe</h3><div class="muted" id="gInfo-ttt"></div></div><button class="btn sm" id="gBtn-ttt" onclick="startGame('ttt')">Play</button></div></div>
+      <div class="card"><div class="row"><div class="grow"><h3>Snake</h3><div class="muted" id="gInfo-snake"></div></div><button class="btn sm" id="gBtn-snake" onclick="startGame('snake')">Play</button></div></div>
+      <div class="card"><div class="row"><div class="grow"><h3>Math Quiz</h3><div class="muted" id="gInfo-quiz"></div></div><button class="btn sm" id="gBtn-quiz" onclick="startGame('quiz')">Play</button></div></div>
+    </div>
+    <div id="gamePanel" style="display:none"></div>
+  </section>
+
+  <!-- REFER -->
+  <section id="v-refer" class="view">
+    <h2>Refer &amp; Earn</h2>
+    <div class="card">
+      <p class="muted" id="refText"></p>
+      <label>Your link</label>
+      <input id="refLink" readonly onclick="this.select()">
+      <div class="row"><button class="btn grow" onclick="copyRef()">Copy link</button><button class="btn grow" onclick="shareRef()">Share</button></div>
+    </div>
+    <div class="card row"><div class="grow"><div class="muted">Friends joined</div><h2 style="margin:0" id="refCount">0</h2></div><div class="grow"><div class="muted">Referral earnings</div><h2 style="margin:0" id="refEarn">0</h2></div></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="v-profile" class="view">
+    <h2>Profile</h2>
+    <div class="card">
+      <div class="row"><div class="grow"><div class="muted">Balance</div><h2 style="margin:0" id="pBal">0</h2></div><div class="grow"><div class="muted">Total earned</div><h2 style="margin:0" id="pTot">0</h2></div></div>
+    </div>
+    <div class="card row"><div class="grow"><div class="muted">Logged in as</div><div id="pEmail" style="word-break:break-all"></div></div><button class="btn sm ghost" onclick="logout()">Logout</button></div>
+    <div class="card">
+      <h3>Withdraw</h3>
+      <div class="muted" id="rateInfo"></div>
+      <div class="seg" style="margin-top:12px">
+        <button class="btn sm" id="mUPI" onclick="setMethod('UPI')">UPI</button>
+        <button class="btn sm ghost" id="mUSDT" onclick="setMethod('USDT')">USDT</button>
+      </div>
+      <div id="netBox" style="display:none"><label>Network</label><select id="net"><option>TRC20</option><option>BEP20</option></select></div>
+      <label id="addrLbl">UPI ID</label><input id="addr" placeholder="name@upi" autocomplete="off">
+      <label id="amtLbl">Amount (₹)</label><input id="amt" type="number" inputmode="decimal" oninput="calcPts()">
+      <div class="muted" id="ptsNeed" style="margin-bottom:10px"></div>
+      <button class="btn block" id="wBtn" onclick="withdraw()">Request withdrawal</button>
+    </div>
+    <div class="card"><h3>Withdrawal history</h3><div id="hist" class="muted">Loading...</div></div>
+  </section>
+</div>
+
+<nav>
+  <button data-v="home" class="on"><span class="ic">🏠</span>Home</button>
+  <button data-v="tasks"><span class="ic">📋</span>Tasks</button>
+  <button data-v="games" class="mid"><span class="ic">⚡</span>Games</button>
+  <button data-v="refer"><span class="ic">👥</span>Refer</button>
+  <button data-v="profile"><span class="ic">👤</span>Profile</button>
+</nav>
+
+<script>
+/* =====================  CONFIG (yahan apni values daalo)  ===================== */
+const CFG = {
+  DEV_MODE: false,               // true = nakli test ads. Live karne se pehle false karo
+  firebase: {                   // Firebase console > Project settings > Your apps se copy karo
+    apiKey: "AIzaSyAVYZQ46H68YzzHiR--SFQTopUfVhiJb6U", authDomain: "dailymearn.firebaseapp.com", projectId: "dailymearn",
+    storageBucket: "dailymearn.firebasestorage.app", messagingSenderId: "860915920667", appId: "1:860915920667:web:8162ddfd689399482fadbe"
+  },
+  botUsername: "dailymearn_bot",       // bot ka username (@ ke bina)
+  appShortName: "app",          // BotFather /newapp me jo short name diya
+  monetagZone: "12025292",       // Monetag zone id (function show_ZONE_ID banta hai)
+  monetagSrc: "//libtl.com/sdk.js", // Monetag dashboard ke snippet se match karo
+  gigaId: "8634",         // GigaPub project id
+  adexiumWid: "1f26ce28-ce0b-4414-8196-4af5b8393693", // Adexium Placement ID (WID)
+  uslId: "468483",              // USL ads Spot / Ad Code ID
+  gigaSrc: "https://ad.gigapub.tech/script?id=", // GigaPub dashboard ke snippet se match karo
+
+  spinsPerDay: 3, spinRewards: [10, 20, 30, 50, 100, 200],
+  adLimit: 10, adCooldownSec: 5,   // har network: 10 ads, har ad ke baad 5 sec wait, 10 ke baad 24 ghante lock
+  adReward: { mt: 60, gp: 80, ax: 90, usl: 60 },
+  checkin: [100, 150, 200, 250, 300, 350, 500],
+  gameLimit: 5,                 // har game ke 5 plays, fir 24 ghante ka lock
+  tttPts: { win: 100, draw: 50, lose: 20 },
+  snakePts: { perFood: 5, min: 20, max: 100 },
+  quizPts: { questions: 5, perCorrect: 20, min: 20 },
+  refBonus: { referrer: 500, newUser: 200 },
+  pointsPerINR: 1000, pointsPerUSDT: 90000, minINR: 10, minUSDT: 1
+};
+/* ============================================================================== */
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n || 0).toLocaleString('en-IN');
+const IST = 19800000;
+const today = () => new Date(Date.now() + IST).toISOString().slice(0, 10);
+const yesterday = () => new Date(Date.now() + IST - 86400000).toISOString().slice(0, 10);
+const newDaily = () => ({ date: today(), spins: 0, mt: 0, gp: 0, ttt: 0, snake: 0 });
+
+let TG, db, auth, ref, U, tid, busy = false, method = 'UPI';
+const inc = n => firebase.firestore.FieldValue.increment(n);
+
+function errMsg(e) {
+  if (!e) return 'ad poora nahi hua (koi detail nahi)';
+  if (typeof e === 'string') return e;
+  if (e.description) return e.description;
+  if (e.message) return e.message;
+  try { return JSON.stringify(e); } catch (x) { return String(e); }
+}
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+/* ---------- ads ---------- */
+function loadScript(src, attrs = {}) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src;
+    Object.entries(attrs).forEach(([k, v]) => s.setAttribute(k, v));
+    s.onload = res; s.onerror = () => rej(new Error('script load fail'));
+    document.head.appendChild(s);
+  });
+}
+async function fakeAd(name) {
+  $('adname').textContent = name + ' ad'; $('adov').classList.add('on');
+  for (let i = 3; i > 0; i--) { $('adcount').textContent = i; await sleep(1000); }
+  $('adov').classList.remove('on');
+}
+async function adMonetag() {
+  if (CFG.DEV_MODE) return fakeAd('Monetag');
+  const fn = window['show_' + CFG.monetagZone];
+  if (typeof fn !== 'function') throw new Error('Monetag ready nahi');
+  await fn();
+}
+async function adGiga() {
+  if (CFG.DEV_MODE) return fakeAd('GigaPub');
+  if (typeof window.showGiga !== 'function') throw new Error('GigaPub abhi set nahi hai');
+  await window.showGiga();
+}
+async function loadAdSdks() {
+  if (CFG.DEV_MODE) return;
+  // Monetag aur GigaPub ke scripts <head> me pehle se lage hain
+}
+
+/* ---------- init ---------- */
+async function init() {
+  TG = window.Telegram && Telegram.WebApp;
+  if (TG) { TG.ready(); TG.expand(); try { TG.disableVerticalSwipes(); } catch (e) {} }
+  const tu = TG && TG.initDataUnsafe && TG.initDataUnsafe.user;
+  if (tu) tid = String(tu.id);
+  else { // sirf browser testing ke liye
+    tid = localStorage.getItem('testId') || ('T' + Date.now());
+    localStorage.setItem('testId', tid);
+  }
+  const name = tu ? (tu.first_name + (tu.last_name ? ' ' + tu.last_name : '')) : 'Test User';
+
+  firebase.initializeApp(CFG.firebase);
+  db = firebase.firestore(); auth = firebase.auth();
+  await requireLogin();
+  $('boot').style.display = 'flex';
+  ref = db.collection('users').doc(tid);
+  let snap = await ref.get();
+  if (!snap.exists) {
+    const sp = (TG && TG.initDataUnsafe && TG.initDataUnsafe.start_param) || new URLSearchParams(location.search).get('ref') || '';
+    const refBy = sp.startsWith('ref_') && sp.slice(4) !== tid ? sp.slice(4) : '';
+    await ref.set({
+      uid: auth.currentUser.uid, name: pendingName || auth.currentUser.displayName || name,
+      email: auth.currentUser.email, tgName: name, points: 0, totalEarned: 0, referredBy: refBy, referralCount: 0,
+      activated: false, streak: 0, lastCheckin: '', daily: newDaily(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    snap = await ref.get();
+  }
+  U = snap.data();
+  if (U.uid !== auth.currentUser.uid) {
+    $('boot').innerHTML = '<div><h3>Account lock hai</h3><p class="muted">Ye Telegram account dusre email se juda hai. Usi email se login karo, ya admin se sampark karo.</p><button class="btn" onclick="logout()">Logout</button></div>';
+    return;
+  }
+  if (!U.daily || U.daily.date !== today()) { U.daily = newDaily(); await ref.update({ daily: U.daily }); }
+  await claimRefs();
+  buildWheel(); bindNav(); renderAll(); loadHistory(); setInterval(tick, 1000);
+  loadAdSdks();
+  $('boot').style.display = 'none';
+}
+
+/* ---------- points ---------- */
+async function earn(pts, fields = {}, after = null) {
+  await ref.update({ points: inc(pts), totalEarned: inc(pts), ...fields });
+  U.points += pts; U.totalEarned = (U.totalEarned || 0) + pts;
+  if (after) after();
+  if (!U.activated) await activate();
+  renderAll();
+}
+async function activate() {
+  U.activated = true;
+  await ref.update({ activated: true });
+  if (U.referredBy) {
+    try {
+      await db.collection('referrals').doc(tid).set({ referrer: U.referredBy, referee: tid, name: U.name, rewarded: false });
+      await earn(CFG.refBonus.newUser);
+    } catch (e) { console.warn(e); }
+  }
+}
+async function claimRefs() {
+  try {
+    const q = await db.collection('referrals').where('referrer', '==', tid).where('rewarded', '==', false).get();
+    for (const d of q.docs) {
+      const b = db.batch();
+      b.update(d.ref, { rewarded: true });
+      b.update(ref, { points: inc(CFG.refBonus.referrer), totalEarned: inc(CFG.refBonus.referrer), referralCount: inc(1) });
+      await b.commit();
+      U.points += CFG.refBonus.referrer; U.totalEarned += CFG.refBonus.referrer; U.referralCount = (U.referralCount || 0) + 1;
+      toast('Friend joined! +' + CFG.refBonus.referrer + ' pts');
+    }
+  } catch (e) { console.warn(e); }
+}
+
+/* ---------- navigation ---------- */
+function bindNav() {
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+}
+function show(v) {
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('on'));
+  $('v-' + v).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v !== 'games') closeGame();
+  if (v === 'profile') loadHistory();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- render ---------- */
+function renderAll() {
+  $('who').textContent = U.name; $('bal').textContent = fmt(U.points);
+  renderSpin(); renderCheckin(); renderAds(); renderGamesInfo(); renderRefer(); renderProfile();
+}
+
+/* ---------- spin ---------- */
+let spinRot = 0;
+function buildWheel() {
+  $('wheel').innerHTML = CFG.spinRewards.map((v, i) =>
+    `<span style="transform:translate(-50%,-50%) rotate(${i * 60 + 30}deg) translateY(-64px)">${v}</span>`).join('');
+}
+function renderSpin() {
+  const left = CFG.spinsPerDay - U.daily.spins;
+  $('spinInfo').textContent = left > 0 ? `Spins left today: ${left}/${CFG.spinsPerDay}  •  Har spin se pehle 2 ads` : 'Kal wapas aana 🔒';
+  $('spinBtn').disabled = left <= 0;
+  $('spinBtn').textContent = left > 0 ? `Spin (${U.daily.spins + 1}/${CFG.spinsPerDay})` : 'Come back tomorrow';
+}
+async function doSpin() {
+  if (busy || U.daily.spins >= CFG.spinsPerDay) return;
+  busy = true; $('spinBtn').disabled = true;
+  try {
+    await adMonetag();
+    if (CFG.gigaId && CFG.gigaId !== 'GIGAPUB_ID') await adGiga();
+  } catch (e) { toast('Error: ' + errMsg(e)); busy = false; renderSpin(); return; }
+  const idx = Math.floor(Math.random() * CFG.spinRewards.length);
+  spinRot = spinRot - (spinRot % 360) + 360 * 5 + (360 - (idx * 60 + 30));
+  $('wheel').style.transform = `rotate(${spinRot}deg)`;
+  await sleep(4200);
+  try { await earn(CFG.spinRewards[idx], { 'daily.spins': inc(1) }, () => { U.daily.spins++; }); toast(`🎉 +${CFG.spinRewards[idx]} points!`); }
+  catch (e) { toast('Error: points save nahi hue'); console.error(e); }
+  busy = false; renderSpin();
+}
+
+/* ---------- check-in ---------- */
+function ciState() {
+  const done = U.lastCheckin === today();
+  let streak = U.streak || 0;
+  if (!done && U.lastCheckin !== yesterday()) streak = 0;
+  return { done, streak };
+}
+function renderCheckin() {
+  const { done, streak } = ciState();
+  const cur = done ? (streak - 1) % 7 : streak % 7;
+  $('days').innerHTML = CFG.checkin.map((p, i) =>
+    `<div class="day ${i < cur || (done && i === cur) ? 'done' : i === cur ? 'now' : ''}"><b>${i + 1}</b>${p}</div>`).join('');
+  $('ciInfo').textContent = done ? 'Aaj ka claim ho gaya. Kal wapas aao!' : `Streak: ${streak} din  •  Claim se pehle 1 ad`;
+  $('ciBtn').disabled = done;
+  $('ciBtn').textContent = done ? 'Claimed ✓' : `Claim +${CFG.checkin[cur]}`;
+}
+async function claimCheckin() {
+  if (busy) return;
+  const { done, streak } = ciState(); if (done) return;
+  busy = true; $('ciBtn').disabled = true;
+  try {
+    await adMonetag();
+  } catch (e) { toast('Error: ' + errMsg(e)); busy = false; renderCheckin(); return; }
+  try {
+    const ns = streak + 1, pts = CFG.checkin[(ns - 1) % 7];
+    await ref.update({ lastCheckin: today(), streak: ns });
+    U.lastCheckin = today(); U.streak = ns;
+    await earn(pts); toast(`+${pts} points!`);
+  } catch (e) { toast('Error, dobara try karo'); console.error(e); }
+  busy = false; renderCheckin();
+}
+
+/* ---------- 24 ghante ka window (ads + games) ---------- */
+const WIN_MS = 86400000;
+const LIMITS = { mt: CFG.adLimit, gp: CFG.adLimit, ax: CFG.adLimit, usl: CFG.adLimit, ttt: CFG.gameLimit, snake: CFG.gameLimit, quiz: CFG.gameLimit };
+const getN = k => U['w_' + k + '_n'] || 0;
+const getAt = k => { const v = U['w_' + k + '_at']; return v ? (v.toMillis ? v.toMillis() : v) : 0; };
+function lockLeft(k) {
+  if (getN(k) < LIMITS[k]) return 0;
+  return Math.max(0, (getAt(k) || Date.now()) + WIN_MS - Date.now());
+}
+const isLocked = k => lockLeft(k) > 0;
+function refreshWin(k) { // 24 ghante poore hone par counter reset
+  if (getN(k) >= LIMITS[k] && lockLeft(k) === 0) {
+    U['w_' + k + '_n'] = 0; U['w_' + k + '_at'] = null;
+    ref.update({ ['w_' + k + '_n']: 0, ['w_' + k + '_at']: null }).catch(e => console.warn(e));
+  }
+}
+function winFields(k) { // ek use ke baad Firestore me kya likhna hai
+  const f = { ['w_' + k + '_n']: inc(1) };
+  if (getN(k) + 1 >= LIMITS[k]) f['w_' + k + '_at'] = firebase.firestore.FieldValue.serverTimestamp();
+  return f;
+}
+function winLocal(k) {
+  U['w_' + k + '_n'] = getN(k) + 1;
+  if (U['w_' + k + '_n'] >= LIMITS[k]) U['w_' + k + '_at'] = Date.now();
+}
+const hms = ms => {
+  const s = Math.ceil(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return [h, m, x].map(v => String(v).padStart(2, '0')).join(':');
+};
+
+/* ---------- watch & earn ---------- */
+// Adexium: autoMode band hai, ad sirf button dabane par manual request se aata hai
+let axW = null, axCur = null;
+function axInit() {
+  if (axW) return;
+  axW = new AdexiumWidget({ wid: CFG.adexiumWid, adFormat: 'interstitial' });
+  axW.on('adReceived', ad => { if (axCur) axW.displayAd(ad); });
+  axW.on('noAdFound', () => { if (axCur) axCur(false, 'Adexium: abhi koi ad available nahi'); });
+  axW.on('adPlaybackCompleted', () => { if (axCur) axCur(true); });
+}
+function adAdexium() {
+  if (CFG.DEV_MODE) return fakeAd('Adexium');
+  if (typeof AdexiumWidget !== 'function') return Promise.reject(new Error('Adexium load nahi hua'));
+  return new Promise((resolve, reject) => {
+    let done = false, t;
+    axCur = (ok, err) => {
+      if (done) return; done = true; clearTimeout(t); axCur = null;
+      ok ? resolve() : reject(new Error(err));
+    };
+    t = setTimeout(() => axCur && axCur(false, 'Adexium: ad poora nahi hua ya time out'), 60000);
+    try { axInit(); axW.requestAd('interstitial'); }
+    catch (e) { axCur(false, 'Adexium: ' + (e && e.message ? e.message : 'start nahi hua')); }
+  });
+}
+// USL ads
+let uslShow = null;
+async function adUSL() {
+  if (CFG.DEV_MODE) return fakeAd('USL');
+  if (typeof window.initCdTma !== 'function') throw new Error('USL load nahi hua');
+  if (!uslShow) uslShow = await window.initCdTma({ id: CFG.uslId });
+  await uslShow();
+}
+const ADS = [
+  { k: 'mt', name: 'Monetag Ads', fn: adMonetag },
+  { k: 'gp', name: 'GigaPub Ads', fn: adGiga },
+  { k: 'ax', name: 'Adexium Ads', fn: adAdexium },
+  { k: 'usl', name: 'USL Ads', fn: adUSL }
+];
+const lastAd = {};
+const adCooldownLeft = k => Math.max(0, (lastAd[k] || 0) + CFG.adCooldownSec * 1000 - Date.now());
+let adsBuilt = false;
+function renderAds() {
+  if (!adsBuilt) {
+    $('adCards').innerHTML = ADS.map(a => `<div class="card"><div class="row"><div class="grow"><h3>${a.name}</h3>
+      <div class="muted" id="adInfo-${a.k}"></div><div class="bar"><i id="adBar-${a.k}"></i></div></div>
+      <button class="btn sm" id="adBtn-${a.k}" onclick="watchAd('${a.k}')"></button></div>
+      <div class="muted" id="adNote-${a.k}"></div></div>`).join('');
+    adsBuilt = true;
+  }
+  ADS.forEach(a => {
+    const k = a.k; refreshWin(k);
+    const n = getN(k), lim = LIMITS[k], lock = lockLeft(k), cd = adCooldownLeft(k), b = $('adBtn-' + k);
+    $('adInfo-' + k).textContent = `${n}/${lim} ads  •  +${CFG.adReward[k]} per ad`;
+    $('adBar-' + k).style.width = (n / lim * 100) + '%';
+    if (lock > 0) { b.textContent = '✓'; b.disabled = true; $('adNote-' + k).textContent = '⏳ Agla session: ' + hms(lock); }
+    else if (cd > 0) { b.textContent = '⏳ ' + Math.ceil(cd / 1000) + 's'; b.disabled = false; $('adNote-' + k).textContent = 'Agla ad ke liye thoda ruko'; }
+    else { b.textContent = '▶ ' + n + '/' + lim; b.disabled = false; $('adNote-' + k).textContent = 'Ad poora dekhne par points milenge.'; }
+  });
+}
+async function watchAd(k) {
+  if (busy) return;
+  refreshWin(k);
+  if (isLocked(k)) return toast('Agla session ' + hms(lockLeft(k)) + ' baad');
+  const cd = adCooldownLeft(k);
+  if (cd > 0) return toast(`⏳ Agla ad ${Math.ceil(cd / 1000)} second baad`);
+  busy = true;
+  const a = ADS.find(x => x.k === k);
+  try { await a.fn(); }
+  catch (e) { toast('Error: ' + errMsg(e)); busy = false; return; }
+  try {
+    await earn(CFG.adReward[k], winFields(k), () => winLocal(k));
+    lastAd[k] = Date.now();
+    toast(`+${CFG.adReward[k]} points!`);
+  } catch (e) { toast('Error: points save nahi hue'); console.error(e); }
+  busy = false; renderAds();
+}
+
+/* ---------- games ---------- */
+const GAMES = { ttt: 'Tic Tac Toe', snake: 'Snake', quiz: 'Math Quiz' };
+let curGame = null;
+function gameInfoText(g) {
+  const pts = g === 'ttt' ? `Jeet +${CFG.tttPts.win} • Draw +${CFG.tttPts.draw} • Haar +${CFG.tttPts.lose}`
+    : g === 'snake' ? `Har food +${CFG.snakePts.perFood} (min ${CFG.snakePts.min}, max ${CFG.snakePts.max})`
+    : `Har sahi jawab +${CFG.quizPts.perCorrect} (min ${CFG.quizPts.min})`;
+  return `${pts}  •  ${getN(g)}/${LIMITS[g]} games`;
+}
+function renderGamesInfo() {
+  Object.keys(GAMES).forEach(g => {
+    refreshWin(g);
+    const lock = lockLeft(g);
+    $('gInfo-' + g).textContent = gameInfoText(g) + (lock > 0 ? `  •  ⏳ ${hms(lock)}` : '');
+    $('gBtn-' + g).disabled = lock > 0;
+  });
+  updateAgain();
+}
+const againHtml = () => `<button class="btn block" id="againBtn" style="margin-top:12px" onclick="startGame('${curGame}')">Play again</button><div class="muted" id="againInfo" style="text-align:center;margin-top:6px"></div>`;
+function updateAgain() {
+  const b = $('againBtn'); if (!b || !curGame) return;
+  const lock = lockLeft(curGame);
+  b.disabled = lock > 0; b.textContent = lock > 0 ? 'Limit poora' : 'Play again';
+  $('againInfo').textContent = lock > 0 ? `⏳ Agla session: ${hms(lock)}` : `${getN(curGame)}/${LIMITS[curGame]} games ho gaye`;
+}
+async function startGame(g) {
+  if (busy) return;
+  refreshWin(g);
+  if (isLocked(g)) return toast('Agla session ' + hms(lockLeft(g)) + ' baad');
+  busy = true;
+  try { await adMonetag(); }
+  catch (e) { toast('Error: ' + errMsg(e)); busy = false; return; }
+  try { await ref.update(winFields(g)); winLocal(g); }
+  catch (e) { toast('Error, dobara try karo'); console.error(e); busy = false; return; }
+  busy = false;
+  snakeStop(); curGame = g;
+  $('gameMenu').style.display = 'none'; $('gamePanel').style.display = 'block';
+  renderGamesInfo();
+  g === 'ttt' ? tttStart() : g === 'snake' ? snakeStart() : quizStart();
+}
+function closeGame() {
+  snakeStop(); curGame = null; qz = null;
+  $('gamePanel').style.display = 'none'; $('gamePanel').innerHTML = ''; $('gameMenu').style.display = 'block';
+}
+
+/* tic tac toe */
+let tb, tOver, tBusy = false, tGen = 0;
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function tWin(b) {
+  for (const [a, c, d] of LINES) if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+  return b.every(x => x) ? 'D' : null;
+}
+function minimax(b, p) {
+  const w = tWin(b); if (w === 'O') return 1; if (w === 'X') return -1; if (w === 'D') return 0;
+  let best = p === 'O' ? -2 : 2;
+  for (let i = 0; i < 9; i++) if (!b[i]) {
+    b[i] = p; const s = minimax(b, p === 'O' ? 'X' : 'O'); b[i] = '';
+    best = p === 'O' ? Math.max(best, s) : Math.min(best, s);
+  }
+  return best;
+}
+function cpuPick() {
+  const empty = tb.map((v, i) => v ? -1 : i).filter(i => i >= 0);
+  if (Math.random() < 0.4) return empty[Math.floor(Math.random() * empty.length)]; // kabhi kabhi galti, taaki jeet sako
+  let bi = empty[0], bs = -2;
+  for (const i of empty) { tb[i] = 'O'; const s = minimax(tb, 'X'); tb[i] = ''; if (s > bs) { bs = s; bi = i; } }
+  return bi;
+}
+function tttStart() { tGen++; tBusy = false; tb = Array(9).fill(''); tOver = false; tttDraw(''); }
+function tttDraw(msg) {
+  $('gamePanel').innerHTML = `<div class="card"><div class="row"><h3 class="grow">Tic Tac Toe</h3><button class="btn sm ghost" onclick="closeGame()">Back</button></div>
+    <div class="muted">Aap = X, computer = O</div>
+    <div class="ttt">${tb.map((v, i) => `<button class="${v === 'O' ? 'o' : ''}" onclick="tttClick(${i})">${v}</button>`).join('')}</div>
+    <div style="text-align:center;font-weight:700;min-height:24px">${msg}</div>
+    ${tOver ? againHtml() : ''}</div>`;
+  if (tOver) updateAgain();
+}
+async function tttClick(i) {
+  if (tOver || tb[i] || tBusy) return;
+  const gen = tGen; tBusy = true;
+  tb[i] = 'X'; let w = tWin(tb);
+  if (!w) {
+    tttDraw(''); await sleep(350);
+    if (gen !== tGen) return;
+    tb[cpuPick()] = 'O'; w = tWin(tb);
+  }
+  if (!w) { tttDraw(''); tBusy = false; return; }
+  tOver = true;
+  const r = w === 'X' ? 'win' : w === 'O' ? 'lose' : 'draw', pts = CFG.tttPts[r];
+  tttDraw((r === 'win' ? '🎉 Aap jeet gaye!' : r === 'draw' ? 'Draw!' : 'Computer jeet gaya') + ` +${pts} pts`);
+  tBusy = false;
+  try { await earn(pts); } catch (e) { toast('Error: points save nahi hue'); }
+}
+
+/* snake */
+const G = 15, CELL = 20; let sn = null;
+function snakeStart() {
+  $('gamePanel').innerHTML = `<div class="card"><div class="row"><h3 class="grow">Snake</h3><button class="btn sm ghost" onclick="closeGame()">Back</button></div>
+    <div class="muted" id="snScore">Score: 0</div>
+    <canvas id="cv" width="${G * CELL}" height="${G * CELL}"></canvas>
+    <div class="pad"><span></span><button onclick="turn(0,-1)">▲</button><span></span><button onclick="turn(-1,0)">◀</button><button onclick="turn(0,1)">▼</button><button onclick="turn(1,0)">▶</button></div>
+    <div id="snEnd"></div></div>`;
+  sn = { body: [{ x: 7, y: 7 }], dir: { x: 1, y: 0 }, next: { x: 1, y: 0 }, score: 0, over: false, timer: null };
+  sn.food = rndFood();
+  let sx, sy; const cv = $('cv');
+  cv.ontouchstart = e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; };
+  cv.ontouchend = e => {
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+    Math.abs(dx) > Math.abs(dy) ? turn(dx > 0 ? 1 : -1, 0) : turn(0, dy > 0 ? 1 : -1);
+  };
+  sn.timer = setInterval(snakeTick, 140); snakeDraw();
+}
+function rndFood() {
+  while (true) {
+    const f = { x: Math.floor(Math.random() * G), y: Math.floor(Math.random() * G) };
+    if (!sn.body.some(s => s.x === f.x && s.y === f.y)) return f;
+  }
+}
+function turn(x, y) { if (sn && !sn.over && !(x === -sn.dir.x && y === -sn.dir.y)) sn.next = { x, y }; }
+function snakeStop() { if (sn && sn.timer) clearInterval(sn.timer); sn = null; }
+function snakeTick() {
+  if (!sn || sn.over) return;
+  sn.dir = sn.next;
+  const h = { x: sn.body[0].x + sn.dir.x, y: sn.body[0].y + sn.dir.y };
+  if (h.x < 0 || h.y < 0 || h.x >= G || h.y >= G || sn.body.some(s => s.x === h.x && s.y === h.y)) return snakeEnd();
+  sn.body.unshift(h);
+  if (h.x === sn.food.x && h.y === sn.food.y) { sn.score++; sn.food = rndFood(); $('snScore').textContent = 'Score: ' + sn.score; }
+  else sn.body.pop();
+  snakeDraw();
+}
+function snakeDraw() {
+  const c = $('cv'); if (!c || !sn) return; const x = c.getContext('2d');
+  x.fillStyle = '#120d06'; x.fillRect(0, 0, c.width, c.height);
+  x.fillStyle = '#f87171'; x.fillRect(sn.food.x * CELL + 3, sn.food.y * CELL + 3, CELL - 6, CELL - 6);
+  sn.body.forEach((s, i) => { x.fillStyle = i ? '#ffb524' : '#fff0c2'; x.fillRect(s.x * CELL + 1, s.y * CELL + 1, CELL - 2, CELL - 2); });
+}
+async function snakeEnd() {
+  const s = sn; s.over = true; clearInterval(s.timer);
+  const pts = Math.max(CFG.snakePts.min, Math.min(s.score * CFG.snakePts.perFood, CFG.snakePts.max));
+  $('snScore').textContent = `Game over! Score ${s.score} → +${pts} pts`;
+  $('snEnd').innerHTML = againHtml(); updateAgain();
+  try { await earn(pts); } catch (e) { toast('Error: points save nahi hue'); }
+}
+
+/* math quiz */
+let qz = null;
+const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+function genQ() {
+  const t = rnd(0, 2); let a, b, ans, txt;
+  if (t === 0) { a = rnd(10, 99); b = rnd(10, 99); ans = a + b; txt = `${a} + ${b}`; }
+  else if (t === 1) { a = rnd(30, 99); b = rnd(5, a - 5); ans = a - b; txt = `${a} − ${b}`; }
+  else { a = rnd(3, 12); b = rnd(3, 12); ans = a * b; txt = `${a} × ${b}`; }
+  const opts = new Set([ans]);
+  while (opts.size < 4) { const d = rnd(1, 10) * (Math.random() < 0.5 ? -1 : 1); if (ans + d >= 0) opts.add(ans + d); }
+  return { txt, ans, opts: [...opts].sort(() => Math.random() - 0.5) };
+}
+function quizStart() { qz = { i: 0, correct: 0, lock: false, q: genQ() }; quizDraw(); }
+function quizDraw() {
+  const q = qz.q;
+  $('gamePanel').innerHTML = `<div class="card"><div class="row"><h3 class="grow">Math Quiz</h3><button class="btn sm ghost" onclick="closeGame()">Back</button></div>
+    <div class="muted">Sawal ${qz.i + 1}/${CFG.quizPts.questions}  •  Sahi: ${qz.correct}</div>
+    <h2 style="text-align:center;font-size:34px;margin:18px 0">${q.txt} = ?</h2>
+    <div class="seg" style="flex-wrap:wrap">${q.opts.map(o => `<button class="btn" style="flex:1 1 45%" onclick="quizAns(${o})">${o}</button>`).join('')}</div></div>`;
+}
+async function quizAns(o) {
+  if (!qz || qz.lock) return;
+  const z = qz; z.lock = true;
+  const ok = o === z.q.ans; if (ok) z.correct++;
+  toast(ok ? '✅ Sahi!' : '❌ Galat, sahi jawab ' + z.q.ans);
+  await sleep(700);
+  if (qz !== z) return;
+  z.i++;
+  if (z.i >= CFG.quizPts.questions) return quizEnd(z);
+  z.q = genQ(); z.lock = false; quizDraw();
+}
+async function quizEnd(z) {
+  const pts = Math.max(CFG.quizPts.min, z.correct * CFG.quizPts.perCorrect);
+  $('gamePanel').innerHTML = `<div class="card"><div class="row"><h3 class="grow">Math Quiz</h3><button class="btn sm ghost" onclick="closeGame()">Back</button></div>
+    <h2 style="text-align:center;margin:18px 0">${z.correct}/${CFG.quizPts.questions} sahi</h2>
+    <div style="text-align:center;font-weight:700">+${pts} points</div>${againHtml()}</div>`;
+  updateAgain();
+  try { await earn(pts); } catch (e) { toast('Error: points save nahi hue'); }
+}
+
+/* har second timers update */
+function tick() {
+  if (!U) return;
+  if ($('v-tasks').classList.contains('on')) renderAds();
+  if ($('v-games').classList.contains('on')) renderGamesInfo();
+}
+
+/* ---------- refer ---------- */
+const refUrl = () => `https://t.me/${CFG.botUsername}/${CFG.appShortName}?startapp=ref_${tid}`;
+function renderRefer() {
+  $('refText').textContent = `Dost ko invite karo. Jab wo pehli baar kamayega, aapko +${CFG.refBonus.referrer} aur use +${CFG.refBonus.newUser} points milenge.`;
+  $('refLink').value = refUrl();
+  $('refCount').textContent = U.referralCount || 0;
+  $('refEarn').textContent = fmt((U.referralCount || 0) * CFG.refBonus.referrer);
+}
+function copyRef() {
+  navigator.clipboard.writeText(refUrl()).then(() => toast('Link copy ho gaya'), () => { $('refLink').select(); toast('Link select karke copy karo'); });
+}
+function shareRef() {
+  const t = encodeURIComponent('Ye app try karo, daily spin aur games se points kamao!');
+  const u = 'https://t.me/share/url?url=' + encodeURIComponent(refUrl()) + '&text=' + t;
+  TG && TG.openTelegramLink ? TG.openTelegramLink(u) : window.open(u, '_blank');
+}
+
+/* ---------- profile / withdraw ---------- */
+function renderProfile() {
+  $('pBal').textContent = fmt(U.points); $('pTot').textContent = fmt(U.totalEarned);
+  $('pEmail').textContent = auth.currentUser.email;
+  $('rateInfo').textContent = `${fmt(CFG.pointsPerINR)} pts = ₹1  •  ${fmt(CFG.pointsPerUSDT)} pts = 1 USDT  •  Min ₹${CFG.minINR} / ${CFG.minUSDT} USDT`;
+  calcPts();
+}
+function setMethod(m) {
+  method = m;
+  $('mUPI').classList.toggle('ghost', m !== 'UPI'); $('mUSDT').classList.toggle('ghost', m !== 'USDT');
+  $('netBox').style.display = m === 'USDT' ? 'block' : 'none';
+  $('addrLbl').textContent = m === 'UPI' ? 'UPI ID' : 'USDT wallet address';
+  $('addr').placeholder = m === 'UPI' ? 'name@upi' : 'T... (TRC20) ya 0x... (BEP20)';
+  $('amtLbl').textContent = m === 'UPI' ? 'Amount (₹)' : 'Amount (USDT)';
+  calcPts();
+}
+function needPts() {
+  const a = parseFloat($('amt').value) || 0;
+  return method === 'UPI' ? Math.round(a) * CFG.pointsPerINR : Math.ceil(a * CFG.pointsPerUSDT);
+}
+function calcPts() { const p = needPts(); $('ptsNeed').textContent = p ? `Points lagenge: ${fmt(p)}` : ''; }
+async function loadHistory() {
+  try {
+    const q = await db.collection('withdrawals').where('uid', '==', auth.currentUser.uid).get();
+    const rows = q.docs.map(d => d.data()).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    $('hist').innerHTML = rows.length ? rows.map(r =>
+      `<div class="item"><div>${esc(r.method)} • ${r.currency === 'INR' ? '₹' : ''}${esc(r.amount)}${r.currency === 'USDT' ? ' USDT' : ''}<div class="muted">${esc(r.address)}</div></div><b class="st-${esc(r.status)}">${esc(r.status)}</b></div>`).join('')
+      : 'Abhi tak koi withdrawal nahi.';
+  } catch (e) { $('hist').textContent = 'History load nahi hui.'; }
+}
+async function withdraw() {
+  if (busy) return;
+  const addr = $('addr').value.trim(), a = parseFloat($('amt').value) || 0, pts = needPts();
+  if (method === 'UPI') {
+    if (!/^[\w.\-]{2,}@[\w]{2,}$/.test(addr)) return toast('Sahi UPI ID daalo');
+    if (a < CFG.minINR) return toast(`Minimum ₹${CFG.minINR}`);
+  } else {
+    const net = $('net').value;
+    const ok = net === 'TRC20' ? /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr) : /^0x[a-fA-F0-9]{40}$/.test(addr);
+    if (!ok) return toast(`Sahi ${net} address daalo`);
+    if (a < CFG.minUSDT) return toast(`Minimum ${CFG.minUSDT} USDT`);
+  }
+  if (pts > U.points) return toast('Points kam hain');
+  if (!confirm(`${method} withdrawal: ${fmt(pts)} points katenge. Address sahi hai?\n${addr}`)) return;
+  busy = true; $('wBtn').disabled = true;
+  try {
+    const b = db.batch();
+    b.set(db.collection('withdrawals').doc(), {
+      uid: auth.currentUser.uid, tid, name: U.name,
+      method: method === 'USDT' ? 'USDT-' + $('net').value : 'UPI',
+      address: addr, amount: method === 'UPI' ? Math.round(a) : a, currency: method === 'UPI' ? 'INR' : 'USDT',
+      points: pts, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    b.update(ref, { points: inc(-pts) });
+    await b.commit();
+    U.points -= pts; $('amt').value = ''; renderAll(); loadHistory();
+    toast('Request bhej di gayi ✓');
+  } catch (e) { toast('Request fail hui'); console.error(e); }
+  busy = false; $('wBtn').disabled = false;
+}
+
+/* ---------- login (name + email + password) ---------- */
+let loginMode = 'signup', pendingName = '';
+function requireLogin() {
+  return new Promise(resolve => {
+    auth.onAuthStateChanged(u => {
+      if (u) { $('login').style.display = 'none'; resolve(u); }
+      else { $('boot').style.display = 'none'; $('login').style.display = 'flex'; }
+    });
+  });
+}
+function toggleLogin() {
+  loginMode = loginMode === 'signup' ? 'login' : 'signup';
+  const s = loginMode === 'signup';
+  $('lTitle').textContent = s ? 'Create account' : 'Login';
+  $('lBtn').textContent = s ? 'Sign up' : 'Login';
+  $('lNameBox').style.display = s ? 'block' : 'none';
+  $('lForgot').style.display = s ? 'none' : 'block';
+  $('lSwitch').textContent = s ? 'Pehle se account hai? Login karo' : 'Naya account banana hai? Sign up karo';
+  $('lErr').textContent = '';
+}
+function loginErr(e) {
+  const m = {
+    'auth/email-already-in-use': 'Ye email pehle se registered hai. Login karo.',
+    'auth/invalid-email': 'Sahi email daalo.',
+    'auth/weak-password': 'Password kam se kam 6 akshar ka rakho.',
+    'auth/invalid-credential': 'Email ya password galat hai.',
+    'auth/user-not-found': 'Is email se account nahi mila.',
+    'auth/wrong-password': 'Password galat hai.',
+    'auth/too-many-requests': 'Bahut koshish ho gayi, thodi der baad try karo.',
+    'auth/network-request-failed': 'Internet check karo.'
+  };
+  $('lErr').textContent = m[e.code] || ('Error: ' + e.message);
+}
+async function submitLogin() {
+  const email = $('lEmail').value.trim(), pw = $('lPw').value, name = $('lName').value.trim();
+  $('lErr').textContent = ''; $('lBtn').disabled = true;
+  try {
+    if (loginMode === 'signup') {
+      if (name.length < 2) { $('lErr').textContent = 'Apna naam daalo.'; $('lBtn').disabled = false; return; }
+      pendingName = name;
+      const c = await auth.createUserWithEmailAndPassword(email, pw);
+      await c.user.updateProfile({ displayName: name });
+    } else {
+      await auth.signInWithEmailAndPassword(email, pw);
+    }
+  } catch (e) { loginErr(e); }
+  $('lBtn').disabled = false;
+}
+async function forgotPw() {
+  const email = $('lEmail').value.trim();
+  if (!email) { $('lErr').textContent = 'Pehle upar email daalo.'; return; }
+  try { await auth.sendPasswordResetEmail(email); $('lErr').style.color = 'var(--ok)'; $('lErr').textContent = 'Reset link email par bhej diya.'; }
+  catch (e) { $('lErr').style.color = ''; loginErr(e); }
+}
+async function logout() { await auth.signOut(); location.reload(); }
+
+init().catch(e => { console.error(e); $('boot').innerHTML = '<div><h3>Error</h3><p class="muted">' + esc(e.message) + '</p></div>'; });
+</script>
+</body>
+</html>
